@@ -10,7 +10,7 @@ logging.basicConfig(
 )
 
 # Token de ton bot Telegram
-TOKEN = "TON_TOKEN_ICI"  # remplace par ton vrai token
+TOKEN = "7832237225:AAE8boS-8C4_nrIqmTPXQkaQbRjr1f_iyWs"
 
 # Charger les paliers depuis le fichier JSON
 with open("paliers.json", "r") as f:
