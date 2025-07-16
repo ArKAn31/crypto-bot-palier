@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: crypto-bot-palier
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python set_webhook.py && python bot.py
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
