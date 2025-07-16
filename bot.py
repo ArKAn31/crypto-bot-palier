@@ -6,18 +6,13 @@ from telegram.ext import Dispatcher, CommandHandler
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 bot = Bot(token=TOKEN)
 app = Flask(__name__)
-
 dispatcher = Dispatcher(bot=bot, update_queue=None, use_context=True)
 
+# Commande /start
 def start(update, context):
-    update.message.reply_text("👋 Bot en ligne via webhook !")
-
-def paliers(update, context):
-    with open("paliers.json", "r") as f:
-        update.message.reply_text("📊 Paliers enregistrés :\n" + f.read())
+    update.message.reply_text("✅ Bot en ligne via webhook !")
 
 dispatcher.add_handler(CommandHandler("start", start))
-dispatcher.add_handler(CommandHandler("paliers", paliers))
 
 @app.route(f'/{TOKEN}', methods=['POST'])
 def webhook():
@@ -27,4 +22,7 @@ def webhook():
 
 @app.route('/')
 def index():
-    return "Bot is running!"
+    return "🤖 Bot is running via webhook"
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
