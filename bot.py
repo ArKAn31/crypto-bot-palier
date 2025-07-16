@@ -1,51 +1,43 @@
-import asyncio
-import threading
-from flask import Flask
+import logging
+import json
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-import os
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+# Configure le logging pour voir les erreurs
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
 
-app = Flask(__name__)
+# Token de ton bot Telegram
+TOKEN = "TON_TOKEN_ICI"  # remplace par ton vrai token
 
-@app.route("/")
-def index():
-    return "Bot is running!"
+# Charger les paliers depuis le fichier JSON
+with open("paliers.json", "r") as f:
+    PALIERS = json.load(f)
 
-# Liste des paliers enregistrés
-paliers = {
-    "ETH": [3545, 4700, 5900, 7100],
-    "LINK": [16.5, 22, 27],
-    "FET": [0.96, 1.28, 1.92],
-    "SOL": [215, 286, 358]
-}
+# Fonction pour formater les paliers en texte
+def formater_paliers(paliers):
+    lignes = ["📊 Paliers enregistrés :"]
+    for crypto, niveaux in paliers.items():
+        for niveau in niveaux:
+            lignes.append(f"• {crypto} ≥ {niveau} €")
+    return "\n".join(lignes)
 
-notified = set()
-chat_id = None
-
+# Commande /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    global chat_id
-    chat_id = update.effective_chat.id
-    await update.message.reply_text("👋 Bot en ligne 24/7 sur Render. Je te préviens dès qu’un palier est atteint !")
+    await update.message.reply_text("👋 Bot en ligne 24/7 sur Render.\nJe te préviens dès qu’un palier est atteint !\n\n" + formater_paliers(PALIERS))
 
-async def show_paliers(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = "📊 Paliers enregistrés :\n"
-    for symbol, targets in paliers.items():
-        for t in targets:
-            msg += f"• {symbol} ≥ {t} €\n"
-    await update.message.reply_text(msg)
+# Commande /paliers
+async def paliers(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(formater_paliers(PALIERS))
 
-def run_telegram_bot():
-    app_bot = ApplicationBuilder().token(BOT_TOKEN).build()
-    app_bot.add_handler(CommandHandler("start", start))
-    app_bot.add_handler(CommandHandler("paliers", show_paliers))
-    app_bot.run_polling()
-
-def run_flask():
-    app.run(host="0.0.0.0", port=10000)
-
+# Main
 if __name__ == "__main__":
-    flask_thread = threading.Thread(target=run_flask)
-    flask_thread.start()
-    run_telegram_bot()
+    app = ApplicationBuilder().token(TOKEN).build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("paliers", paliers))
+
+    app.run_polling()
+
