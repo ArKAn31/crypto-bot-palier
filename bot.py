@@ -33,6 +33,7 @@ def index():
     return "🤖 Bot is running via webhook"
 
 # Lancement de l'app Flask
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
+# Ne pas lancer app.run si c’est Render qui exécute
+# On supprime ce bloc :
+# if __name__ == '__main__':
+#     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
