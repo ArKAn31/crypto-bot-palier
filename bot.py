@@ -3,69 +3,73 @@ import json
 from flask import Flask, request
 from telegram import Bot, Update
 from telegram.ext import Dispatcher, CommandHandler
+import logging
 
-# Initialisation du bot avec le token
+# Configuration du bot
 TOKEN = os.environ.get("TELEGRAM_TOKEN")
 bot = Bot(token=TOKEN)
-
-# Flask pour recevoir les webhooks
 app = Flask(__name__)
-
-# Dispatcher pour gérer les commandes Telegram
 dispatcher = Dispatcher(bot, None, workers=0)
 
-# Chargement des données depuis paliers.json
+# Activer les logs si besoin
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+
+# Charger les paliers
 with open("paliers.json", encoding="utf-8") as f:
     paliers = json.load(f)
 
-# Séparation des paliers en achat et vente selon leur valeur
-def get_achat_vente():
-    achats = []
-    ventes = []
-    for palier in paliers:
-        ligne = palier.strip()
-        if "≥" in ligne:
-            achats.append(ligne)
-        elif "Vente" in ligne or "≥" not in ligne:
-            ventes.append(ligne)
-    return achats, ventes
+# Fonction d'affichage achat/vente
+def get_palier_message(symbole: str, type_zone: str) -> str:
+    symbole = symbole.upper()
+    if symbole not in paliers:
+        return f"❌ Crypto inconnue : {symbole}.\nUtilise un des symboles suivants : {', '.join(paliers.keys())}"
+    
+    zones = paliers[symbole].get(type_zone, [])
+    if not zones:
+        return f"Aucune zone de {type_zone} disponible pour {symbole}."
+    
+    titre = "📉 Zones d'achat" if type_zone == "achat" else "📈 Zones de vente"
+    return f"{titre} pour {symbole} :\n\n" + "\n".join(zones)
 
 # Commande /achat
-def achat_command(update: Update, context):
-    achats, _ = get_achat_vente()
-    message = "📉 Zones d’achat :\n\n" + "\n".join(achats)
+def achat_handler(update: Update, context):
+    if context.args:
+        symbole = context.args[0]
+        message = get_palier_message(symbole, "achat")
+    else:
+        message = "❗ Utilise la commande comme ceci : /achat BTC"
     update.message.reply_text(message)
 
 # Commande /vente
-def vente_command(update: Update, context):
-    _, ventes = get_achat_vente()
-    if ventes:
-        message = "📈 Zones de vente :\n\n" + "\n".join(ventes)
+def vente_handler(update: Update, context):
+    if context.args:
+        symbole = context.args[0]
+        message = get_palier_message(symbole, "vente")
     else:
-        message = "Aucune zone de vente trouvée dans les données."
+        message = "❗ Utilise la commande comme ceci : /vente ETH"
     update.message.reply_text(message)
 
-# Ajout des commandes au dispatcher
-dispatcher.add_handler(CommandHandler("achat", achat_command))
-dispatcher.add_handler(CommandHandler("vente", vente_command))
+# Ajouter les handlers
+dispatcher.add_handler(CommandHandler("achat", achat_handler))
+dispatcher.add_handler(CommandHandler("vente", vente_handler))
 
-# Route webhook pour Telegram
-@app.route(f'/{TOKEN}', methods=["POST"])
-def webhook():
+# Webhook
+@app.route(f"/{TOKEN}", methods=["POST"])
+def telegram_webhook():
     update = Update.de_json(request.get_json(force=True), bot)
     dispatcher.process_update(update)
     return "OK"
 
-# Configuration automatique du webhook à chaque lancement
+# Définir le webhook automatiquement au premier lancement
 @app.before_first_request
 def setup_webhook():
-    url = os.environ.get("RENDER_EXTERNAL_URL")  # doit être défini dans Render
-    if url:
-        webhook_url = f"{url}/{TOKEN}"
-        bot.set_webhook(webhook_url)
+    public_url = os.environ.get("RENDER_EXTERNAL_URL")
+    if public_url:
+        bot.set_webhook(f"{public_url}/{TOKEN}")
 
-# Route simple pour vérifier que le bot tourne
+# Page d’accueil simple
 @app.route("/")
 def index():
-    return "Bot Telegram crypto actif !"
+    return "✅ Bot Telegram crypto actif !"
+
 
