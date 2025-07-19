@@ -61,6 +61,11 @@ def home():
 if __name__ == "__main__":
     public_url = os.environ.get("RENDER_EXTERNAL_URL")
     if public_url:
-        app_telegram.bot.set_webhook(f"{public_url}/{TOKEN}")
+        import asyncio
+
+        # On attend la fin de la création du webhook
+        asyncio.run(app_telegram.bot.set_webhook(f"{public_url}/{TOKEN}"))
+
+    # Lancement du serveur Flask
     app.run(host="0.0.0.0", port=10000)
 
