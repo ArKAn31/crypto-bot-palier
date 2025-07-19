@@ -23,9 +23,8 @@ def get_palier_message(symbole: str, type_zone: str) -> str:
     if not zones:
         return f"Aucune zone de {type_zone} pour {symbole}."
     titre = "📉 Zones d'achat" if type_zone == "achat" else "📈 Zones de vente"
+    # Retour sur une seule ligne pour éviter l'erreur
     return f"{titre} pour {symbole} :\n\n" + "\n".join(zones)
-
-" + "\n".join(zones)
 
 async def achat_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.args:
@@ -64,3 +63,4 @@ if __name__ == "__main__":
     if public_url:
         app_telegram.bot.set_webhook(f"{public_url}/{TOKEN}")
     app.run(host="0.0.0.0", port=10000)
+
