@@ -3,7 +3,7 @@ import json
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-# --- Charge tes paliers depuis paliers.json
+# --- Charge tes paliers
 with open("paliers.json", encoding="utf-8") as f:
     paliers = json.load(f)
 
@@ -40,6 +40,7 @@ def main():
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CommandHandler("achat", achat_command))
     app.add_handler(CommandHandler("vente", vente_command))
+    print("🤖 Bot démarré en polling...")
     app.run_polling()
 
 if __name__ == "__main__":
