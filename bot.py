@@ -3,7 +3,7 @@ import json
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-# --- Charge tes paliers
+# --- Charge tes paliers depuis paliers.json
 with open("paliers.json", encoding="utf-8") as f:
     paliers = json.load(f)
 
@@ -34,7 +34,6 @@ async def vente_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await update.message.reply_text("❗️ Usage : `/vente ETH`")
     await update.message.reply_text(get_palier_message(context.args[0], "vente"))
 
-# --- Lancement en polling
 def main():
     token = os.environ["TELEGRAM_TOKEN"]
     app = ApplicationBuilder().token(token).build()
@@ -45,4 +44,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
