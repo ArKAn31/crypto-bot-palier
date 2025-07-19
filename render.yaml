@@ -1,8 +1,7 @@
 services:
   - type: worker
-    name: crypto-bot-worker
+    name: crypto-bot-worker    # nom de ton worker
     env: python
     plan: free
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python bot.py"
-    pythonVersion: 3.10.13
