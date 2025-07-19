@@ -14,34 +14,53 @@ def get_palier_message(symbole: str, type_zone: str) -> str:
     zones = paliers[symbole].get(type_zone, [])
     if not zones:
         return f"Aucune zone de {type_zone} pour {symbole}."
-    titre = "📉 Zones d'achat" if type_zone == "achat" else "📈 Zones de vente"
-    return f"{titre} pour {symbole} :\n\n" + "\n".join(zones)
+    # Construit le message ligne par ligne
+    lignes = [f"🪙 *{symbole}* — Zones de *{type_zone}* :"]
+    for z in zones:
+        lignes.append(f"• {z}")
+    return "\n".join(lignes)
 
-# --- Handlers Telegram
+# --- Handlers pour les commandes
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "👋 Salut ! Je suis CryptoPalierBot.\n"
-        "Utilise `/achat <SYMBOL>` ou `/vente <SYMBOL>`."
+        "🤖 *Bot Crypto*\n\n"
+        "Utilisez :\n"
+        "/achat `<SYMBOL>` — pour les zones d’achat\n"
+        "/vente `<SYMBOL>` — pour les zones de vente\n"
+        "Exemple : `/achat BTC`",
+        parse_mode="Markdown"
     )
 
 async def achat_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        return await update.message.reply_text("❗️ Usage : `/achat BTC`")
-    await update.message.reply_text(get_palier_message(context.args[0], "achat"))
+        return await update.message.reply_text("❗️ Usage : `/achat BTC`", parse_mode="Markdown")
+    symbole = context.args[0].upper()
+    msg = get_palier_message(symbole, "achat")
+    await update.message.reply_text(msg, parse_mode="Markdown")
 
 async def vente_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
-        return await update.message.reply_text("❗️ Usage : `/vente ETH`")
-    await update.message.reply_text(get_palier_message(context.args[0], "vente"))
+        return await update.message.reply_text("❗️ Usage : `/vente BTC`", parse_mode="Markdown")
+    symbole = context.args[0].upper()
+    msg = get_palier_message(symbole, "vente")
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+# --- Point d’entrée
 
 def main():
-    token = os.environ["TELEGRAM_TOKEN"]
+    token = os.environ.get("TELEGRAM_TOKEN")
+    if not token:
+        raise RuntimeError("⚠️ La variable d’environnement TELEGRAM_TOKEN n’est pas définie.")
     app = ApplicationBuilder().token(token).build()
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CommandHandler("achat", achat_command))
     app.add_handler(CommandHandler("vente", vente_command))
     print("🤖 Bot démarré en polling...")
     app.run_polling()
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
