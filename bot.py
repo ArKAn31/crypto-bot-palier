@@ -18,7 +18,7 @@ app_telegram = ApplicationBuilder().token(TOKEN).build()
 def get_palier_message(symbole: str, type_zone: str) -> str:
     symbole = symbole.upper()
     if symbole not in paliers:
-        return f"❌ Crypto inconnue : {symbole}.
+        return f"❌ Crypto inconnue : {symbole}.\nCommandes valides : {', '.join(paliers.keys())}"
 Commandes valides : {', '.join(paliers.keys())}"
     zones = paliers[symbole].get(type_zone, [])
     if not zones:
