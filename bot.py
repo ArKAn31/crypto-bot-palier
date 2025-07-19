@@ -4,20 +4,17 @@ from flask import Flask, request
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-# Charger les paliers depuis le fichier JSON
+# Charger les paliers
 with open("paliers.json", encoding="utf-8") as f:
     paliers = json.load(f)
 
-# Créer l'application Flask
+# Flask app
 app = Flask(__name__)
-
-# Récupérer le token Telegram
 TOKEN = os.environ.get("TELEGRAM_TOKEN")
 
-# Créer l'application Telegram
+# Telegram bot app
 app_telegram = ApplicationBuilder().token(TOKEN).build()
 
-# Fonction utilitaire pour afficher les zones
 def get_palier_message(symbole: str, type_zone: str) -> str:
     symbole = symbole.upper()
     if symbole not in paliers:
@@ -28,7 +25,6 @@ def get_palier_message(symbole: str, type_zone: str) -> str:
     titre = "📉 Zones d'achat" if type_zone == "achat" else "📈 Zones de vente"
     return f"{titre} pour {symbole} :\n\n" + "\n".join(zones)
 
-# Commande /achat
 async def achat_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.args:
         symbole = context.args[0]
@@ -37,7 +33,6 @@ async def achat_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message = "❗ Utilise la commande comme ceci : /achat BTC"
     await update.message.reply_text(message)
 
-# Commande /vente
 async def vente_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.args:
         symbole = context.args[0]
@@ -46,11 +41,11 @@ async def vente_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message = "❗ Utilise la commande comme ceci : /vente ETH"
     await update.message.reply_text(message)
 
-# Ajouter les handlers
+# Ajouter les commandes
 app_telegram.add_handler(CommandHandler("achat", achat_command))
 app_telegram.add_handler(CommandHandler("vente", vente_command))
 
-# Webhook pour Telegram
+# Webhook route
 @app.route(f"/{TOKEN}", methods=["POST"])
 async def webhook():
     data = request.get_json(force=True)
@@ -58,12 +53,10 @@ async def webhook():
     await app_telegram.process_update(update)
     return "OK"
 
-# Page d'accueil (test)
 @app.route("/")
 def home():
-    return "✅ Bot Telegram Crypto actif via Render"
+    return "✅ Bot actif sur Render !"
 
-# Lancement Flask + configuration webhook
 if __name__ == "__main__":
     public_url = os.environ.get("RENDER_EXTERNAL_URL")
     if public_url:
