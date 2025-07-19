@@ -18,13 +18,12 @@ app_telegram = ApplicationBuilder().token(TOKEN).build()
 def get_palier_message(symbole: str, type_zone: str) -> str:
     symbole = symbole.upper()
     if symbole not in paliers:
-        return f"❌ Crypto inconnue : {symbole}.
-Commandes valides : {', '.join(paliers.keys())}"
+        return f"❌ Crypto inconnue : {symbole}.\nCommandes valides : {', '.join(paliers.keys())}"
     zones = paliers[symbole].get(type_zone, [])
     if not zones:
         return f"Aucune zone de {type_zone} pour {symbole}."
     titre = "📉 Zones d'achat" if type_zone == "achat" else "📈 Zones de vente"
-    return f"{titre} pour {symbole} :
+    return f"{titre} pour {symbole} :\n\n" + "\n".join(zones)
 
 " + "\n".join(zones)
 
