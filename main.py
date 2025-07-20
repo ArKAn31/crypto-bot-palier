@@ -1,12 +1,11 @@
-
-
-
 import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import requests
 import os
 import json
+import asyncio
+import re
 
 # Emplacement du fichier de paliers sauvegardés
 PALIERS_FILE = "paliers.json"
@@ -54,7 +53,43 @@ def get_crypto_price(symbol):
     except Exception:
         return None
 
-# /start et /help
+# ------------------ ALERTES AUTOMATIQUES ------------------
+# Pour éviter de spammer les alertes à chaque boucle
+alertes_envoyees = set()
+
+async def surveiller_paliers(app):
+    await app.bot.initialize()
+    while True:
+        for symbole in user_paliers:
+            prix_actuel = get_crypto_price(symbole)
+            if not prix_actuel:
+                continue
+            # Vérification des paliers d'achat
+            for palier_txt in user_paliers[symbole]["achat"]:
+                match = re.search(r"(\d+[ ,]?\d*)", palier_txt)
+                if match:
+                    palier_val = float(match.group(1).replace(" ", "").replace(",", "."))
+                    if prix_actuel <= palier_val and (symbole, "achat", palier_val) not in alertes_envoyees:
+                        await app.bot.send_message(
+                            chat_id=TON_ID_TELEGRAM,  # Mets ici ton ID Telegram (ex : 123456789)
+                            text=f"🔔 ALERTE ACHAT {symbole} : Prix actuel = {prix_actuel}$ ⏬\nPalier atteint : {palier_txt}"
+                        )
+                        alertes_envoyees.add((symbole, "achat", palier_val))
+            # Vérification des paliers de vente
+            for palier_txt in user_paliers[symbole]["vente"]:
+                match = re.search(r"(\d+[ ,]?\d*)", palier_txt)
+                if match:
+                    palier_val = float(match.group(1).replace(" ", "").replace(",", "."))
+                    if prix_actuel >= palier_val and (symbole, "vente", palier_val) not in alertes_envoyees:
+                        await app.bot.send_message(
+                            chat_id=TON_ID_TELEGRAM,  # Mets ici ton ID Telegram (ex : 123456789)
+                            text=f"🔔 ALERTE VENTE {symbole} : Prix actuel = {prix_actuel}$ ⏫\nPalier atteint : {palier_txt}"
+                        )
+                        alertes_envoyees.add((symbole, "vente", palier_val))
+        await asyncio.sleep(300)  # Toutes les 5 minutes
+
+# ------------------ COMMANDES TELEGRAM ------------------
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "👋 *Bienvenue sur le bot d’alertes crypto !*\n\n"
@@ -73,7 +108,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 help = start
 
-# /setpalier <SYMBOLE> <achat|vente> <PRIX>
 async def setpalier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         _, symbole, type_palier, prix = update.message.text.split()
@@ -86,15 +120,14 @@ async def setpalier(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if symbole not in user_paliers:
             user_paliers[symbole] = {"achat": [], "vente": []}
-        if prix not in user_paliers[symbole][type_palier]:
-            user_paliers[symbole][type_palier].append(prix)
+        if prix not in [float(re.search(r"(\d+[ ,]?\d*)", p).group(1).replace(" ", "").replace(",", ".")) for p in user_paliers[symbole][type_palier] if re.search(r"(\d+[ ,]?\d*)", p)]:
+            user_paliers[symbole][type_palier].append(f"{prix} $")
             user_paliers[symbole][type_palier].sort()
             sauvegarder_paliers(user_paliers)
         await update.message.reply_text(f"✅ Palier '{type_palier}' ajouté pour {symbole} à {prix} $")
     except Exception as e:
         await update.message.reply_text("Format incorrect. Exemple : /setpalier BTC achat 42000")
 
-# /paliers
 async def paliers(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user_paliers:
         await update.message.reply_text("Aucun palier enregistré. Utilise /setpalier pour en ajouter.")
@@ -103,26 +136,27 @@ async def paliers(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for symbole, p in user_paliers.items():
         for t in ["achat", "vente"]:
             if p[t]:
-                text += f"\n_{symbole}_ — {t} : " + ", ".join([f"{x}$" for x in p[t]])
+                text += f"\n_{symbole}_ — {t} : " + ", ".join([f"{x}" for x in p[t]])
     await update.message.reply_markdown(text)
 
-# /supprpalier <SYMBOLE> <achat|vente> <PRIX>
 async def supprpalier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         _, symbole, type_palier, prix = update.message.text.split()
         symbole = symbole.upper()
         type_palier = type_palier.lower()
         prix = float(prix.replace(",", "."))
-        if (symbole in user_paliers and prix in user_paliers[symbole][type_palier]):
-            user_paliers[symbole][type_palier].remove(prix)
-            sauvegarder_paliers(user_paliers)
-            await update.message.reply_text(f"❌ Palier supprimé pour {symbole} {type_palier} à {prix} $")
-        else:
-            await update.message.reply_text("Ce palier n’existe pas.")
+        paliers = user_paliers.get(symbole, {}).get(type_palier, [])
+        for p in paliers:
+            match = re.search(r"(\d+[ ,]?\d*)", p)
+            if match and float(match.group(1).replace(" ", "").replace(",", ".")) == prix:
+                user_paliers[symbole][type_palier].remove(p)
+                sauvegarder_paliers(user_paliers)
+                await update.message.reply_text(f"❌ Palier supprimé pour {symbole} {type_palier} à {prix} $")
+                return
+        await update.message.reply_text("Ce palier n’existe pas.")
     except Exception:
         await update.message.reply_text("Format incorrect. Exemple : /supprpalier BTC achat 42000")
 
-# /prix <SYMBOLE>
 async def prix(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         _, symbole = update.message.text.split()
@@ -138,8 +172,11 @@ async def prix(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         await update.message.reply_text("Format : /prix BTC")
 
+# ------------------ LANCEMENT BOT ------------------
+
 if __name__ == "__main__":
-    TOKEN = "TON_TOKEN_TELEGRAM"  # <-- Mets ton token ici
+    TOKEN = "8160338970:AAHb3BwRAmedK4eHbcH_mlKc9LpcAGBBhck"  # <-- Mets ton token ici
+    TON_ID_TELEGRAM = 1107884310   # <-- Mets ton ID Telegram ici (ex: 123456789)
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help))
@@ -151,3 +188,4 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.create_task(surveiller_paliers(app))
     app.run_polling()
+
