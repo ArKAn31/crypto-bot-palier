@@ -1,21 +1,38 @@
+
+
+
 import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import requests
 import os
+import json
 
-# Pour stocker les paliers de chaque utilisateur (en mémoire)
-user_paliers = {}
+# Emplacement du fichier de paliers sauvegardés
+PALIERS_FILE = "paliers.json"
 
-# Logger pour le debug
+# Charger les paliers depuis le fichier (ou utiliser {} si fichier absent/corrompu)
+def charger_paliers():
+    try:
+        with open(PALIERS_FILE, "r") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+# Sauvegarder les paliers dans le fichier
+def sauvegarder_paliers(paliers):
+    with open(PALIERS_FILE, "w") as f:
+        json.dump(paliers, f, indent=2, ensure_ascii=False)
+
+# Au démarrage, on charge tous les paliers du fichier JSON
+user_paliers = charger_paliers()
+
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 
-# Liste des cryptos supportées
 CRYPTO_LIST = ['BTC', 'ETH', 'LINK', 'AVAX', 'TAO', 'SOL', 'ONDO', 'ESX']
 
-# Récupère le prix actuel via Coingecko EN DOLLARS
 def get_crypto_price(symbol):
     mapping = {
         'BTC': 'bitcoin',
@@ -34,7 +51,7 @@ def get_crypto_price(symbol):
         url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies=usd"
         resp = requests.get(url).json()
         return resp[coin_id]['usd']
-    except Exception as e:
+    except Exception:
         return None
 
 # /start et /help
@@ -54,7 +71,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_markdown(text)
 
-help = start  # même réponse que /start
+help = start
 
 # /setpalier <SYMBOLE> <achat|vente> <PRIX>
 async def setpalier(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -67,27 +84,23 @@ async def setpalier(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Commande invalide. Exemple : /setpalier BTC achat 42000")
             return
 
-        user_id = update.effective_user.id
-        if user_id not in user_paliers:
-            user_paliers[user_id] = {}
-        if symbole not in user_paliers[user_id]:
-            user_paliers[user_id][symbole] = {"achat": [], "vente": []}
-        # Ajoute et trie
-        if prix not in user_paliers[user_id][symbole][type_palier]:
-            user_paliers[user_id][symbole][type_palier].append(prix)
-            user_paliers[user_id][symbole][type_palier].sort()
+        if symbole not in user_paliers:
+            user_paliers[symbole] = {"achat": [], "vente": []}
+        if prix not in user_paliers[symbole][type_palier]:
+            user_paliers[symbole][type_palier].append(prix)
+            user_paliers[symbole][type_palier].sort()
+            sauvegarder_paliers(user_paliers)
         await update.message.reply_text(f"✅ Palier '{type_palier}' ajouté pour {symbole} à {prix} $")
     except Exception as e:
         await update.message.reply_text("Format incorrect. Exemple : /setpalier BTC achat 42000")
 
 # /paliers
 async def paliers(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    if user_id not in user_paliers or not user_paliers[user_id]:
+    if not user_paliers:
         await update.message.reply_text("Aucun palier enregistré. Utilise /setpalier pour en ajouter.")
         return
-    text = "📊 *Tes paliers enregistrés :*\n"
-    for symbole, p in user_paliers[user_id].items():
+    text = "📊 *Paliers enregistrés :*\n"
+    for symbole, p in user_paliers.items():
         for t in ["achat", "vente"]:
             if p[t]:
                 text += f"\n_{symbole}_ — {t} : " + ", ".join([f"{x}$" for x in p[t]])
@@ -100,10 +113,9 @@ async def supprpalier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         symbole = symbole.upper()
         type_palier = type_palier.lower()
         prix = float(prix.replace(",", "."))
-        user_id = update.effective_user.id
-        if (user_id in user_paliers and symbole in user_paliers[user_id] and 
-                prix in user_paliers[user_id][symbole][type_palier]):
-            user_paliers[user_id][symbole][type_palier].remove(prix)
+        if (symbole in user_paliers and prix in user_paliers[symbole][type_palier]):
+            user_paliers[symbole][type_palier].remove(prix)
+            sauvegarder_paliers(user_paliers)
             await update.message.reply_text(f"❌ Palier supprimé pour {symbole} {type_palier} à {prix} $")
         else:
             await update.message.reply_text("Ce palier n’existe pas.")
@@ -126,10 +138,8 @@ async def prix(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         await update.message.reply_text("Format : /prix BTC")
 
-# ----- Lancement du bot -----
 if __name__ == "__main__":
-    # Mets ici ton vrai token entre les guillemets !
-    TOKEN = "8160338970:AAHb3BwRAmedK4eHbcH_mlKc9LpcAGBBhck"  # <-- Ton token à toi
+    TOKEN = "8160338970:AAHb3BwRAmedK4eHbcH_mlKc9LpcAGBBhck"  # <-- Mets ton token ici
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help))
@@ -139,5 +149,3 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("prix", prix))
     print("Bot lancé !")
     app.run_polling()
-
-
