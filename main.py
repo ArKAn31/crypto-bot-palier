@@ -139,7 +139,7 @@ async def prix(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Format : /prix BTC")
 
 if __name__ == "__main__":
-    TOKEN = "8160338970:AAHb3BwRAmedK4eHbcH_mlKc9LpcAGBBhck"  # <-- Mets ton token ici
+    TOKEN = "TON_TOKEN_TELEGRAM"  # <-- Mets ton token ici
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help))
@@ -148,4 +148,6 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("supprpalier", supprpalier))
     app.add_handler(CommandHandler("prix", prix))
     print("Bot lancé !")
+    loop = asyncio.get_event_loop()
+    loop.create_task(surveiller_paliers(app))
     app.run_polling()
