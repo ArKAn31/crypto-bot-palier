@@ -140,12 +140,14 @@ async def main():
     await app.run_polling()
 
 if __name__ == "__main__":
-    import asyncio
-    import sys
-
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(main())
+    import os
+    TOKEN = os.getenv("BOT_TOKEN") or "ICI_TON_TOKEN_TELEGRAM"
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help))
+    app.add_handler(CommandHandler("setpalier", setpalier))
+    app.add_handler(CommandHandler("paliers", paliers))
+    app.add_handler(CommandHandler("supprpalier", supprpalier))
+    app.add_handler(CommandHandler("prix", prix))
+    print("Bot lancé !")
+    app.run_polling()
