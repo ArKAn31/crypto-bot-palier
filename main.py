@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import requests
 
-# Pour stocker les paliers de chaque utilisateur
+# Pour stocker les paliers de chaque utilisateur (en mémoire)
 user_paliers = {}
 
 # Logger pour le debug
@@ -11,7 +11,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 
-# Liste des cryptos prises en charge (ajoute ici si tu veux en plus)
+# Liste des cryptos supportées (à compléter si tu veux en ajouter)
 CRYPTO_LIST = ['BTC', 'ETH', 'LINK', 'AVAX', 'TAO', 'SOL', 'ONDO', 'ESX']
 
 # Récupère le prix actuel via Coingecko
@@ -138,6 +138,16 @@ async def main():
     app.add_handler(CommandHandler("prix", prix))
     print("Bot lancé !")
     await app.run_polling()
+
+if __name__ == "__main__":
+    import asyncio
+    try:
+        asyncio.run(main())
+    except RuntimeError:
+        # Event loop déjà lancée : on utilise get_event_loop
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())
+
 
 if __name__ == "__main__":
     import asyncio
