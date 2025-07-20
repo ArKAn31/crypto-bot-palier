@@ -2,6 +2,7 @@ import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 import requests
+import os
 
 # Pour stocker les paliers de chaque utilisateur (en mémoire)
 user_paliers = {}
@@ -11,7 +12,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 
-# Liste des cryptos supportées (à compléter si tu veux en ajouter)
+# Liste des cryptos supportées
 CRYPTO_LIST = ['BTC', 'ETH', 'LINK', 'AVAX', 'TAO', 'SOL', 'ONDO', 'ESX']
 
 # Récupère le prix actuel via Coingecko
@@ -126,22 +127,9 @@ async def prix(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Format : /prix BTC")
 
 # ----- Lancement du bot -----
-async def main():
-    import os
-    TOKEN = os.getenv("BOT_TOKEN") or "ICI_TON_TOKEN_TELEGRAM"
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", help))
-    app.add_handler(CommandHandler("setpalier", setpalier))
-    app.add_handler(CommandHandler("paliers", paliers))
-    app.add_handler(CommandHandler("supprpalier", supprpalier))
-    app.add_handler(CommandHandler("prix", prix))
-    print("Bot lancé !")
-    await app.run_polling()
-
 if __name__ == "__main__":
-    import os
-    TOKEN = os.getenv("BOT_TOKEN") or "ICI_TON_TOKEN_TELEGRAM"
+    # Mets ici ton vrai token entre les guillemets !
+    TOKEN = "8160338970:AAHb3BwRAmedK4eHbcH_mlKc9LpcAGBBhck"  # <-- Ton token à toi
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help))
@@ -149,5 +137,5 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("paliers", paliers))
     app.add_handler(CommandHandler("supprpalier", supprpalier))
     app.add_handler(CommandHandler("prix", prix))
-    print("Bot lancé !")
-    app.run_polling()
+   print("Bot lancé !")
+app.run_polling()
