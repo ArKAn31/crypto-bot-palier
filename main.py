@@ -15,7 +15,7 @@ logging.basicConfig(
 # Liste des cryptos supportées
 CRYPTO_LIST = ['BTC', 'ETH', 'LINK', 'AVAX', 'TAO', 'SOL', 'ONDO', 'ESX']
 
-# Récupère le prix actuel via Coingecko
+# Récupère le prix actuel via Coingecko EN DOLLARS
 def get_crypto_price(symbol):
     mapping = {
         'BTC': 'bitcoin',
@@ -31,9 +31,9 @@ def get_crypto_price(symbol):
         coin_id = mapping.get(symbol.upper())
         if not coin_id:
             return None
-        url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies=eur"
+        url = f"https://api.coingecko.com/api/v3/simple/price?ids={coin_id}&vs_currencies=usd"
         resp = requests.get(url).json()
-        return resp[coin_id]['eur']
+        return resp[coin_id]['usd']
     except Exception as e:
         return None
 
@@ -48,8 +48,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• /prix — Voir le prix actuel d’une crypto\n"
         "• /help — Revoir cette liste de commandes\n\n"
         "_Exemples d’utilisation :_\n"
-        "`/setpalier BTC achat 42000` (ajoute un seuil d’achat BTC à 42 000 €)\n"
-        "`/setpalier ETH vente 8000` (ajoute un seuil de vente ETH à 8 000 €)\n"
+        "`/setpalier BTC achat 42000` (ajoute un seuil d’achat BTC à 42 000 $)\n"
+        "`/setpalier ETH vente 8000` (ajoute un seuil de vente ETH à 8 000 $)\n"
         "`/prix SOL` (affiche le prix actuel du SOL)\n"
     )
     await update.message.reply_markdown(text)
@@ -76,7 +76,7 @@ async def setpalier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if prix not in user_paliers[user_id][symbole][type_palier]:
             user_paliers[user_id][symbole][type_palier].append(prix)
             user_paliers[user_id][symbole][type_palier].sort()
-        await update.message.reply_text(f"✅ Palier '{type_palier}' ajouté pour {symbole} à {prix} €")
+        await update.message.reply_text(f"✅ Palier '{type_palier}' ajouté pour {symbole} à {prix} $")
     except Exception as e:
         await update.message.reply_text("Format incorrect. Exemple : /setpalier BTC achat 42000")
 
@@ -90,7 +90,7 @@ async def paliers(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for symbole, p in user_paliers[user_id].items():
         for t in ["achat", "vente"]:
             if p[t]:
-                text += f"\n_{symbole}_ — {t} : " + ", ".join([f"{x}€" for x in p[t]])
+                text += f"\n_{symbole}_ — {t} : " + ", ".join([f"{x}$" for x in p[t]])
     await update.message.reply_markdown(text)
 
 # /supprpalier <SYMBOLE> <achat|vente> <PRIX>
@@ -104,7 +104,7 @@ async def supprpalier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if (user_id in user_paliers and symbole in user_paliers[user_id] and 
                 prix in user_paliers[user_id][symbole][type_palier]):
             user_paliers[user_id][symbole][type_palier].remove(prix)
-            await update.message.reply_text(f"❌ Palier supprimé pour {symbole} {type_palier} à {prix} €")
+            await update.message.reply_text(f"❌ Palier supprimé pour {symbole} {type_palier} à {prix} $")
         else:
             await update.message.reply_text("Ce palier n’existe pas.")
     except Exception:
@@ -120,7 +120,7 @@ async def prix(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         value = get_crypto_price(symbole)
         if value:
-            await update.message.reply_text(f"Le prix actuel de {symbole} est : {value:,} €")
+            await update.message.reply_text(f"Le prix actuel de {symbole} est : {value:,} $")
         else:
             await update.message.reply_text("Erreur lors de la récupération du prix.")
     except Exception:
@@ -129,7 +129,7 @@ async def prix(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ----- Lancement du bot -----
 if __name__ == "__main__":
     # Mets ici ton vrai token entre les guillemets !
-    TOKEN = "8160338970:AAHb3BwRAmedK4eHbcH_mlKc9LpcAGBBhck"
+    TOKEN = "8160338970:AAHb3BwRAmedK4eHbcH_mlKc9LpcAGBBhck"  # <-- Ton token à toi
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help))
@@ -139,3 +139,5 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("prix", prix))
     print("Bot lancé !")
     app.run_polling()
+
+
