@@ -129,7 +129,7 @@ async def prix(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ----- Lancement du bot -----
 if __name__ == "__main__":
     # Mets ici ton vrai token entre les guillemets !
-    TOKEN = "8160338970:AAHb3BwRAmedK4eHbcH_mlKc9LpcAGBBhck"  # <-- Ton token à toi
+    TOKEN = "8160338970:AAHb3BwRAmedK4eHbcH_mlKc9LpcAGBBhck"
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help))
@@ -137,5 +137,5 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("paliers", paliers))
     app.add_handler(CommandHandler("supprpalier", supprpalier))
     app.add_handler(CommandHandler("prix", prix))
-   print("Bot lancé !")
-app.run_polling()
+    print("Bot lancé !")
+    app.run_polling()
