@@ -141,14 +141,11 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
-    try:
-        asyncio.run(main())
-    except RuntimeError:
-        # Event loop déjà lancée : on utilise get_event_loop
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(main())
+    import sys
 
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main())
