@@ -215,8 +215,8 @@ async def alertes(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ------------------ LANCEMENT BOT ------------------
 
 if __name__ == "__main__":
-    TOKEN = "TON_TOKEN_TELEGRAM"  # Mets ton token Telegram ici
-    TON_ID_TELEGRAM = 123456789   # Mets ton ID Telegram ici (ex: 123456789)
+    TOKEN = "8160338970:AAHb3BwRAmedK4eHbcH_mlKc9LpcAGBBhck"  # Mets ton token Telegram ici
+    TON_ID_TELEGRAM = 1107884310   # Mets ton ID Telegram ici (ex: 123456789)
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help))
