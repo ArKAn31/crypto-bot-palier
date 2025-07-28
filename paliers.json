@@ -3,7 +3,8 @@
     "achat": [
       "33 000 $ - Zone macro support",
       "42 000 $ - Retracement Fib 0.5",
-      "52 000 $ - Zone support MM200W"
+      "52 000 $ - Zone support MM200W",
+      "62 000 $ - Niveau intermédiaire"
     ],
     "vente": [
       "98 000 $ (15%) - Prise de bénéfices palier 1",
@@ -16,41 +17,86 @@
     "achat": [
       "2 800 $ - Zone support hebdo",
       "3 200 $ - MM200D",
-      "3 800 $ - Zone support/accumulation"
+      "3 800 $ - Zone support/accumulation",
+      "4 300 $ - Précédent sommet cycle"
     ],
     "vente": [
       "7 000 $ (30%) - Prise de bénéfices palier 1",
-      "9 800 $ (50%) - Zone de distribution historique"
+      "9 800 $ (50%) - Zone de distribution historique",
+      "12 500 $ - Extension finale"
     ]
   },
   "SOL": {
     "achat": [
       "50 $ - Zone support clé",
-      "67 $ - MM200D"
+      "67 $ - MM200D",
+      "90 $ - Support intermédiaire"
     ],
     "vente": [
       "180 $ (20%) - Zone de résistance cycle",
-      "225 $ (30%) - Extension fibo"
+      "225 $ (30%) - Extension fibo",
+      "270 $ - Extension ultime"
     ]
   },
   "AVAX": {
     "achat": [
       "18 $ - Support long terme",
-      "26 $ - Zone d'accumulation"
+      "26 $ - Zone d'accumulation",
+      "33 $ - Niveau d'entrée intermédiaire"
     ],
     "vente": [
       "65 $ (25%) - Prise de bénéfices",
-      "97 $ (40%) - Extension du cycle"
+      "97 $ (40%) - Extension du cycle",
+      "120 $ - Extension ultime"
     ]
   },
   "LINK": {
     "achat": [
       "10 $ - Support macro",
-      "14 $ - Support hebdo"
+      "14 $ - Support hebdo",
+      "18 $ - Niveau intermédiaire"
     ],
     "vente": [
       "35 $ (30%) - Prise de bénéfices",
-      "50 $ (60%) - Extension cycle"
+      "50 $ (60%) - Extension cycle",
+      "65 $ - Extension finale"
+    ]
+  },
+  "ONDO": {
+    "achat": [
+      "0.70 $ - Zone support H4",
+      "0.90 $ - MM200H4",
+      "1.20 $ - Zone d'accumulation"
+    ],
+    "vente": [
+      "2.20 $ - Zone extension fibo",
+      "3.00 $ - Objectif cycle",
+      "3.60 $ - Extension ultime"
+    ]
+  },
+  "TAO": {
+    "achat": [
+      "150 $ - Support majeur",
+      "180 $ - Zone de rebond",
+      "210 $ - Niveau d'accumulation"
+    ],
+    "vente": [
+      "410 $ - Zone prise de bénéfices",
+      "520 $ - Objectif extension",
+      "600 $ - Extension finale"
+    ]
+  },
+  "ESX": {
+    "achat": [
+      "0.18 $ - Support clé",
+      "0.23 $ - MM200H4",
+      "0.30 $ - Zone d'accumulation"
+    ],
+    "vente": [
+      "0.60 $ - Objectif cycle",
+      "1.10 $ - Extension fibo",
+      "1.50 $ - Extension finale"
     ]
   }
 }
+
