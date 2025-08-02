@@ -15,27 +15,31 @@
   },
   "ETH": {
     "achat": [
-      "2 800 $ - Zone support hebdo",
-      "3 200 $ - MM200D",
-      "3 800 $ - Zone support/accumulation",
-      "4 300 $ - Précédent sommet cycle"
+      "3032 $ - 0,5 D",
+      "2663 $ - 0,5 S",
+      "2367 $ - 0,61 S (Rlz)",
+      "2128 $ - PML"
     ],
     "vente": [
-      "7 000 $ (30%) - Prise de bénéfices palier 1",
-      "9 800 $ (50%) - Zone de distribution historique",
-      "12 500 $ - Extension finale"
+      "4800 $ (15%) - History High",
+      "5900 $ (25%) - Prise sérieuse de profits",
+      "7000 $ (45%) - Plus grosse prise de profit du cycle",
+      "7600 $ (10%) - Avant dernière prise de profit",
+      "8339 $ - Dernier profit"
     ]
   },
   "SOL": {
     "achat": [
-      "50 $ - Zone support clé",
-      "67 $ - MM200D",
-      "90 $ - Support intermédiaire"
+      "166 $ - 0,5 D",
+      "150 $ - 0,5 S",
+      "137 $ - 0,61 S",
+      "126$ - PML"
     ],
     "vente": [
-      "180 $ (20%) - Zone de résistance cycle",
-      "225 $ (30%) - Extension fibo",
-      "270 $ - Extension ultime"
+      "215 $ (15%) - Premieres prise de profits",
+      "286 $ (25%) - History High",
+      "330 $ - (45%) - Grosse prise de profit",
+      "400 $ - ( 15%) - Target final"
     ]
   },
   "AVAX": {
