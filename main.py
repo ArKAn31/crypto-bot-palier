@@ -129,16 +129,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "👋 *Bienvenue sur le bot d’alertes crypto !*\n\n"
         "Voici les commandes disponibles :\n\n"
-        "• /setpalier — Ajouter/modifier un seuil d’achat ou de vente\n"
-        "• /paliers — Voir la liste de tes seuils enregistrés\n"
-        "• /supprpalier — Supprimer un seuil\n"
+        "• /paliers — Voir la liste des seuils enregistrés\n"
         "• /prix — Voir le prix actuel d’une crypto\n"
         "• /alertes — Voir les dernières alertes passées\n"
         "• /help — Revoir cette liste de commandes\n\n"
-        "_Exemples d’utilisation :_\n"
-        "`/setpalier BTC achat 42000` (ajoute un seuil d’achat BTC à 42 000 $)\n"
-        "`/setpalier ETH vente 8000` (ajoute un seuil de vente ETH à 8 000 $)\n"
-        "`/prix SOL` (affiche le prix actuel du SOL)\n"
     )
     await update.message.reply_markdown(text)
 
